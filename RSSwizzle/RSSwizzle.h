@@ -11,17 +11,17 @@
 #pragma mark - Macros Based API
 
 /// A macro for wrapping the return type of the swizzled method.
-#define RSSWReturnType(type) type
+#define TL_RSSWReturnType(type) type
 
 /// A macro for wrapping arguments of the swizzled method.
-#define RSSWArguments(arguments...) _RSSWArguments(arguments)
+#define TL_RSSWArguments(arguments...) _TL_RSSWArguments(arguments)
 
 /// A macro for wrapping the replacement code for the swizzled method.
-#define RSSWReplacement(code...) code
+#define TL_RSSWReplacement(code...) code
 
 /// A macro for casting and calling original implementation.
-/// May be used only in RSSwizzleInstanceMethod or RSSwizzleClassMethod macros.
-#define RSSWCallOriginal(arguments...) _RSSWCallOriginal(arguments)
+/// May be used only in TL_RSSwizzleInstanceMethod or RSSwizzleClassMethod macros.
+#define TL_RSSWCallOriginal(arguments...) _TL_RSSWCallOriginal(arguments)
 
 #pragma mark └ Swizzle Instance Method
 
@@ -32,21 +32,21 @@
 
  @code
 
-    RSSwizzleInstanceMethod(classToSwizzle,
+    TL_RSSwizzleInstanceMethod(classToSwizzle,
                             @selector(calculate:),
-                            RSSWReturnType(int),
-                            RSSWArguments(int number),
-                            RSSWReplacement(
+                            TL_RSSWReturnType(int),
+                            TL_RSSWArguments(int number),
+                            TL_RSSWReplacement(
     {
         // Calling original implementation.
-        int res = RSSWCallOriginal(number);
+        int res = TL_RSSWCallOriginal(number);
         // Returning modified return value.
         return res + 1;
     }), 0, NULL);
  
  @endcode
  
- Swizzling frequently goes along with checking whether this particular class (or one of its superclasses) has been already swizzled. Here the `RSSwizzleMode` and `key` parameters can help. See +[RSSwizzle swizzleInstanceMethod:inClass:newImpFactory:mode:key:] for details.
+ Swizzling frequently goes along with checking whether this particular class (or one of its superclasses) has been already swizzled. Here the `TL_RSSwizzleMode` and `key` parameters can help. See +[TL_RSSwizzle swizzleInstanceMethod:inClass:newImpFactory:mode:key:] for details.
 
  Swizzling is fully thread-safe.
 
@@ -54,32 +54,32 @@
 
  @param selector Selector of the method that should be swizzled.
  
- @param RSSWReturnType The return type of the swizzled method wrapped in the RSSWReturnType macro.
+ @param TL_RSSWReturnType The return type of the swizzled method wrapped in the TL_RSSWReturnType macro.
  
- @param RSSWArguments The arguments of the swizzled method wrapped in the RSSWArguments macro.
+ @param TL_RSSWArguments The arguments of the swizzled method wrapped in the TL_RSSWArguments macro.
  
- @param RSSWReplacement The code of the new implementation of the swizzled method wrapped in the RSSWReplacement macro.
+ @param TL_RSSWReplacement The code of the new implementation of the swizzled method wrapped in the TL_RSSWReplacement macro.
  
- @param RSSwizzleMode The mode is used in combination with the key to indicate whether the swizzling should be done for the given class. You can pass 0 for RSSwizzleModeAlways.
+ @param TL_RSSwizzleMode The mode is used in combination with the key to indicate whether the swizzling should be done for the given class. You can pass 0 for TL_RSSwizzleModeAlways.
  
- @param key The key is used in combination with the mode to indicate whether the swizzling should be done for the given class. May be NULL if the mode is RSSwizzleModeAlways.
+ @param key The key is used in combination with the mode to indicate whether the swizzling should be done for the given class. May be NULL if the mode is TL_RSSwizzleModeAlways.
 
  @return YES if successfully swizzled and NO if swizzling has been already done for given key and class (or one of superclasses, depends on the mode).
 
  */
-#define RSSwizzleInstanceMethod(classToSwizzle, \
+#define TL_RSSwizzleInstanceMethod(classToSwizzle, \
                                 selector, \
-                                RSSWReturnType, \
-                                RSSWArguments, \
-                                RSSWReplacement, \
-                                RSSwizzleMode, \
+                                TL_RSSWReturnType, \
+                                TL_RSSWArguments, \
+                                TL_RSSWReplacement, \
+                                TL_RSSwizzleMode, \
                                 key) \
-    _RSSwizzleInstanceMethod(classToSwizzle, \
+    _TL_RSSwizzleInstanceMethod(classToSwizzle, \
                              selector, \
-                             RSSWReturnType, \
-                             _RSSWWrapArg(RSSWArguments), \
-                             _RSSWWrapArg(RSSWReplacement), \
-                             RSSwizzleMode, \
+                             TL_RSSWReturnType, \
+                             _TL_RSSWWrapArg(TL_RSSWArguments), \
+                             _TL_RSSWWrapArg(TL_RSSWReplacement), \
+                             TL_RSSwizzleMode, \
                              key)
 
 #pragma mark └ Swizzle Class Method
@@ -93,12 +93,12 @@
 
     RSSwizzleClassMethod(classToSwizzle,
                          @selector(calculate:),
-                         RSSWReturnType(int),
-                         RSSWArguments(int number),
-                         RSSWReplacement(
+                         TL_RSSWReturnType(int),
+                         TL_RSSWArguments(int number),
+                         TL_RSSWReplacement(
     {
         // Calling original implementation.
-        int res = RSSWCallOriginal(number);
+        int res = TL_RSSWCallOriginal(number);
         // Returning modified return value.
         return res + 1;
     }));
@@ -111,35 +111,35 @@
 
  @param selector Selector of the method that should be swizzled.
  
- @param RSSWReturnType The return type of the swizzled method wrapped in the RSSWReturnType macro.
+ @param TL_RSSWReturnType The return type of the swizzled method wrapped in the TL_RSSWReturnType macro.
  
- @param RSSWArguments The arguments of the swizzled method wrapped in the RSSWArguments macro.
+ @param TL_RSSWArguments The arguments of the swizzled method wrapped in the TL_RSSWArguments macro.
  
- @param RSSWReplacement The code of the new implementation of the swizzled method wrapped in the RSSWReplacement macro.
+ @param TL_RSSWReplacement The code of the new implementation of the swizzled method wrapped in the TL_RSSWReplacement macro.
  
  */
 #define RSSwizzleClassMethod(classToSwizzle, \
                              selector, \
-                             RSSWReturnType, \
-                             RSSWArguments, \
-                             RSSWReplacement) \
+                             TL_RSSWReturnType, \
+                             TL_RSSWArguments, \
+                             TL_RSSWReplacement) \
     _RSSwizzleClassMethod(classToSwizzle, \
                           selector, \
-                          RSSWReturnType, \
-                          _RSSWWrapArg(RSSWArguments), \
-                          _RSSWWrapArg(RSSWReplacement))
+                          TL_RSSWReturnType, \
+                          _TL_RSSWWrapArg(TL_RSSWArguments), \
+                          _TL_RSSWWrapArg(TL_RSSWReplacement))
 
 #pragma mark - Main API
 
 /**
  A function pointer to the original implementation of the swizzled method.
  */
-typedef void (*RSSwizzleOriginalIMP)(void /* id, SEL, ... */ );
+typedef void (*TL_RSSwizzleOriginalIMP)(void /* id, SEL, ... */ );
 
 /**
- RSSwizzleInfo is used in the new implementation block to get and call original implementation of the swizzled method.
+ TL_RSSwizzleInfo is used in the new implementation block to get and call original implementation of the swizzled method.
  */
-@interface RSSwizzleInfo : NSObject
+@interface TL_RSSwizzleInfo : NSObject
 
 /**
  Returns the original implementation of the swizzled method.
@@ -150,7 +150,7 @@ typedef void (*RSSwizzleOriginalIMP)(void /* id, SEL, ... */ );
  
  @return A function pointer to the original implementation of the swizzled method.
  */
--(RSSwizzleOriginalIMP)getOriginalImplementation;
+-(TL_RSSwizzleOriginalIMP)getOriginalImplementation;
 
 /// The selector of the swizzled method.
 @property (nonatomic, readonly) SEL selector;
@@ -168,19 +168,19 @@ typedef void (*RSSwizzleOriginalIMP)(void /* id, SEL, ... */ );
     Its signature should be: `method_return_type ^(id self, method_args...)`. 
     The selector is not available as a parameter to this block.
  */
-typedef id (^RSSwizzleImpFactoryBlock)(RSSwizzleInfo *swizzleInfo);
+typedef id (^TL_RSSwizzleImpFactoryBlock)(TL_RSSwizzleInfo *swizzleInfo);
 
-typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
-    /// RSSwizzle always does swizzling.
-    RSSwizzleModeAlways = 0,
-    /// RSSwizzle does not do swizzling if the same class has been swizzled earlier with the same key.
-    RSSwizzleModeOncePerClass = 1,
-    /// RSSwizzle does not do swizzling if the same class or one of its superclasses have been swizzled earlier with the same key.
+typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
+    /// TL_RSSwizzle always does swizzling.
+    TL_RSSwizzleModeAlways = 0,
+    /// TL_RSSwizzle does not do swizzling if the same class has been swizzled earlier with the same key.
+    TL_RSSwizzleModeOncePerClass = 1,
+    /// TL_RSSwizzle does not do swizzling if the same class or one of its superclasses have been swizzled earlier with the same key.
     /// @note There is no guarantee that your implementation will be called only once per method call. If the order of swizzling is: first inherited class, second superclass, then both swizzlings will be done and the new implementation will be called twice.
-    RSSwizzleModeOncePerClassAndSuperclasses = 2
+    TL_RSSwizzleModeOncePerClassAndSuperclasses = 2
 };
 
-@interface RSSwizzle : NSObject
+@interface TL_RSSwizzle : NSObject
 
 #pragma mark └ Swizzle Instance Method
 
@@ -196,10 +196,10 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
  @code
 
     SEL selector = @selector(calculate:);
-    [RSSwizzle
+    [TL_RSSwizzle
      swizzleInstanceMethod:selector
      inClass:classToSwizzle
-     newImpFactory:^id(RSSWizzleInfo *swizzleInfo) {
+     newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) {
          // This block will be used as the new implementation.
          return ^int(__unsafe_unretained id self, int num){
              // You MUST always cast implementation to the correct function pointer.
@@ -211,7 +211,7 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
              return res + 1;
          };
      }
-     mode:RSSwizzleModeAlways
+     mode:TL_RSSwizzleModeAlways
      key:NULL];
  
  @endcode
@@ -224,10 +224,10 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
  
     static const void *key = &key;
     SEL selector = NSSelectorFromString(@"dealloc");
-    [RSSwizzle
+    [TL_RSSwizzle
      swizzleInstanceMethod:selector
      inClass:classToSwizzle
-     newImpFactory:^id(RSSWizzleInfo *swizzleInfo) {
+     newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) {
          return ^void(__unsafe_unretained id self){
              NSLog(@"Deallocating %@.",self);
              
@@ -236,7 +236,7 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
              originalIMP(self,selector);
          };
      }
-     mode:RSSwizzleModeOncePerClassAndSuperclasses
+     mode:TL_RSSwizzleModeOncePerClassAndSuperclasses
      key:key];
  
  @endcode
@@ -251,14 +251,14 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
  
  @param mode The mode is used in combination with the key to indicate whether the swizzling should be done for the given class.
  
- @param key The key is used in combination with the mode to indicate whether the swizzling should be done for the given class. May be NULL if the mode is RSSwizzleModeAlways.
+ @param key The key is used in combination with the mode to indicate whether the swizzling should be done for the given class. May be NULL if the mode is TL_RSSwizzleModeAlways.
 
  @return YES if successfully swizzled and NO if swizzling has been already done for given key and class (or one of superclasses, depends on the mode).
  */
 +(BOOL)swizzleInstanceMethod:(SEL)selector
                      inClass:(Class)classToSwizzle
-               newImpFactory:(RSSwizzleImpFactoryBlock)factoryBlock
-                        mode:(RSSwizzleMode)mode
+               newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
+                        mode:(TL_RSSwizzleMode)mode
                          key:(const void *)key;
 
 #pragma mark └ Swizzle Class method
@@ -275,10 +275,10 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
  @code
 
     SEL selector = @selector(calculate:);
-    [RSSwizzle
+    [TL_RSSwizzle
      swizzleClassMethod:selector
      inClass:classToSwizzle
-     newImpFactory:^id(RSSWizzleInfo *swizzleInfo) {
+     newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) {
          // This block will be used as the new implementation.
          return ^int(__unsafe_unretained id self, int num){
              // You MUST always cast implementation to the correct function pointer.
@@ -303,7 +303,7 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
  */
 +(void)swizzleClassMethod:(SEL)selector
                   inClass:(Class)classToSwizzle
-            newImpFactory:(RSSwizzleImpFactoryBlock)factoryBlock;
+            newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock;
 
 @end
 
@@ -311,60 +311,60 @@ typedef NS_ENUM(NSUInteger, RSSwizzleMode) {
 // Do not write code that depends on anything below this line.
 
 // Wrapping arguments to pass them as a single argument to another macro.
-#define _RSSWWrapArg(args...) args
+#define _TL_RSSWWrapArg(args...) args
 
-#define _RSSWDel2Arg(a1, a2, args...) a1, ##args
-#define _RSSWDel3Arg(a1, a2, a3, args...) a1, a2, ##args
+#define _TL_RSSWDel2Arg(a1, a2, args...) a1, ##args
+#define _TL_RSSWDel3Arg(a1, a2, a3, args...) a1, a2, ##args
 
 // To prevent comma issues if there are no arguments we add one dummy argument
 // and remove it later.
-#define _RSSWArguments(arguments...) DEL, ##arguments
+#define _TL_RSSWArguments(arguments...) DEL, ##arguments
 
-#define _RSSwizzleInstanceMethod(classToSwizzle, \
+#define _TL_RSSwizzleInstanceMethod(classToSwizzle, \
                                  selector, \
-                                 RSSWReturnType, \
-                                 RSSWArguments, \
-                                 RSSWReplacement, \
-                                 RSSwizzleMode, \
+                                 TL_RSSWReturnType, \
+                                 TL_RSSWArguments, \
+                                 TL_RSSWReplacement, \
+                                 TL_RSSwizzleMode, \
                                  KEY) \
-    [RSSwizzle \
+    [TL_RSSwizzle \
      swizzleInstanceMethod:selector \
      inClass:[classToSwizzle class] \
-     newImpFactory:^id(RSSwizzleInfo *swizzleInfo) { \
-        RSSWReturnType (*originalImplementation_)(_RSSWDel3Arg(__unsafe_unretained id, \
+     newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) { \
+        TL_RSSWReturnType (*originalImplementation_)(_TL_RSSWDel3Arg(__unsafe_unretained id, \
                                                                SEL, \
-                                                               RSSWArguments)); \
+                                                               TL_RSSWArguments)); \
         SEL selector_ = selector; \
-        return ^RSSWReturnType (_RSSWDel2Arg(__unsafe_unretained id self, \
-                                             RSSWArguments)) \
+        return ^TL_RSSWReturnType (_TL_RSSWDel2Arg(__unsafe_unretained id self, \
+                                             TL_RSSWArguments)) \
         { \
-            RSSWReplacement \
+            TL_RSSWReplacement \
         }; \
      } \
-     mode:RSSwizzleMode \
+     mode:TL_RSSwizzleMode \
      key:KEY];
 
 #define _RSSwizzleClassMethod(classToSwizzle, \
                               selector, \
-                              RSSWReturnType, \
-                              RSSWArguments, \
-                              RSSWReplacement) \
-    [RSSwizzle \
+                              TL_RSSWReturnType, \
+                              TL_RSSWArguments, \
+                              TL_RSSWReplacement) \
+    [TL_RSSwizzle \
      swizzleClassMethod:selector \
      inClass:[classToSwizzle class] \
-     newImpFactory:^id(RSSwizzleInfo *swizzleInfo) { \
-        RSSWReturnType (*originalImplementation_)(_RSSWDel3Arg(__unsafe_unretained id, \
+     newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) { \
+        TL_RSSWReturnType (*originalImplementation_)(_TL_RSSWDel3Arg(__unsafe_unretained id, \
                                                                SEL, \
-                                                               RSSWArguments)); \
+                                                               TL_RSSWArguments)); \
         SEL selector_ = selector; \
-        return ^RSSWReturnType (_RSSWDel2Arg(__unsafe_unretained id self, \
-                                             RSSWArguments)) \
+        return ^TL_RSSWReturnType (_TL_RSSWDel2Arg(__unsafe_unretained id self, \
+                                             TL_RSSWArguments)) \
         { \
-            RSSWReplacement \
+            TL_RSSWReplacement \
         }; \
      }];
 
-#define _RSSWCallOriginal(arguments...) \
+#define _TL_RSSWCallOriginal(arguments...) \
     ((__typeof(originalImplementation_))[swizzleInfo \
                                          getOriginalImplementation])(self, \
                                                                      selector_, \

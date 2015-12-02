@@ -18,14 +18,14 @@
 #if !defined(NS_BLOCK_ASSERTIONS)
 
 // See http://clang.llvm.org/docs/Block-ABI-Apple.html#high-level
-struct Block_literal_1 {
+struct TL_Block_literal_1 {
     void *isa; // initialized to &_NSConcreteStackBlock or &_NSConcreteGlobalBlock
     int flags;
     int reserved;
     void (*invoke)(void *, ...);
     struct Block_descriptor_1 {
         unsigned long int reserved;         // NULL
-        unsigned long int size;         // sizeof(struct Block_literal_1)
+        unsigned long int size;         // sizeof(struct TL_Block_literal_1)
         // optional helper functions
         void (*copy_helper)(void *dst, void *src);     // IFF (1<<25)
         void (*dispose_helper)(void *src);             // IFF (1<<25)
@@ -36,24 +36,24 @@ struct Block_literal_1 {
 };
 
 enum {
-    BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
-    BLOCK_HAS_CTOR =          (1 << 26), // helpers have C++ code
-    BLOCK_IS_GLOBAL =         (1 << 28),
-    BLOCK_HAS_STRET =         (1 << 29), // IFF BLOCK_HAS_SIGNATURE
-    BLOCK_HAS_SIGNATURE =     (1 << 30),
+    TL_BLOCK_HAS_COPY_DISPOSE =  (1 << 25),
+    TL_BLOCK_HAS_CTOR =          (1 << 26), // helpers have C++ code
+    TL_BLOCK_IS_GLOBAL =         (1 << 28),
+    TL_BLOCK_HAS_STRET =         (1 << 29), // IFF TL_BLOCK_HAS_SIGNATURE
+    TL_BLOCK_HAS_SIGNATURE =     (1 << 30),
 };
-typedef int BlockFlags;
+typedef int TL_BlockFlags;
 
-static const char *blockGetType(id block){
-    struct Block_literal_1 *blockRef = (__bridge struct Block_literal_1 *)block;
-    BlockFlags flags = blockRef->flags;
+static const char *TL_blockGetType(id block){
+    struct TL_Block_literal_1 *blockRef = (__bridge struct TL_Block_literal_1 *)block;
+    TL_BlockFlags flags = blockRef->flags;
     
-    if (flags & BLOCK_HAS_SIGNATURE) {
+    if (flags & TL_BLOCK_HAS_SIGNATURE) {
         void *signatureLocation = blockRef->descriptor;
         signatureLocation += sizeof(unsigned long int);
         signatureLocation += sizeof(unsigned long int);
         
-        if (flags & BLOCK_HAS_COPY_DISPOSE) {
+        if (flags & TL_BLOCK_HAS_COPY_DISPOSE) {
             signatureLocation += sizeof(void(*)(void *dst, void *src));
             signatureLocation += sizeof(void (*)(void *src));
         }
@@ -65,9 +65,9 @@ static const char *blockGetType(id block){
     return NULL;
 }
 
-static BOOL blockIsCompatibleWithMethodType(id block, const char *methodType){
+static BOOL TL_blockIsCompatibleWithMethodType(id block, const char *methodType){
     
-    const char *blockType = blockGetType(block);
+    const char *blockType = TL_blockGetType(block);
     
     NSMethodSignature *blockSignature;
     
@@ -145,12 +145,12 @@ static BOOL blockIsCompatibleWithMethodType(id block, const char *methodType){
     return YES;
 }
 
-static BOOL blockIsAnImpFactoryBlock(id block){
-    const char *blockType = blockGetType(block);
-    RSSwizzleImpFactoryBlock dummyFactory = ^id(RSSwizzleInfo *swizzleInfo){
+static BOOL TL_blockIsAnImpFactoryBlock(id block){
+    const char *blockType = TL_blockGetType(block);
+    TL_RSSwizzleImpFactoryBlock dummyFactory = ^id(TL_RSSwizzleInfo *swizzleInfo){
         return nil;
     };
-    const char *factoryType = blockGetType(dummyFactory);
+    const char *factoryType = TL_blockGetType(dummyFactory);
     return 0 == strcmp(factoryType, blockType);
 }
 
@@ -159,31 +159,31 @@ static BOOL blockIsAnImpFactoryBlock(id block){
 
 #pragma mark - Swizzling
 
-#pragma mark └ RSSwizzleInfo
-typedef IMP (^RSSWizzleImpProvider)(void);
+#pragma mark └ TL_RSSwizzleInfo
+typedef IMP (^TL_RSSWizzleImpProvider)(void);
 
-@interface RSSwizzleInfo()
-@property (nonatomic,copy) RSSWizzleImpProvider impProviderBlock;
+@interface TL_RSSwizzleInfo()
+@property (nonatomic,copy) TL_RSSWizzleImpProvider impProviderBlock;
 @property (nonatomic, readwrite) SEL selector;
 @end
 
-@implementation RSSwizzleInfo
+@implementation TL_RSSwizzleInfo
 
--(RSSwizzleOriginalIMP)getOriginalImplementation{
+-(TL_RSSwizzleOriginalIMP)getOriginalImplementation{
     NSAssert(_impProviderBlock,nil);
-    // Casting IMP to RSSwizzleOriginalIMP to force user casting.
-    return (RSSwizzleOriginalIMP)_impProviderBlock();
+    // Casting IMP to TL_RSSwizzleOriginalIMP to force user casting.
+    return (TL_RSSwizzleOriginalIMP)_impProviderBlock();
 }
 
 @end
 
 
 #pragma mark └ RSSwizzle
-@implementation RSSwizzle
+@implementation TL_RSSwizzle
 
-static void swizzle(Class classToSwizzle,
+static void TL_swizzle(Class classToSwizzle,
                     SEL selector,
-                    RSSwizzleImpFactoryBlock factoryBlock)
+                    TL_RSSwizzleImpFactoryBlock factoryBlock)
 {
     Method method = class_getInstanceMethod(classToSwizzle, selector);
     
@@ -193,7 +193,7 @@ static void swizzle(Class classToSwizzle,
               class_isMetaClass(classToSwizzle) ? @"class" : @"instance",
               classToSwizzle);
     
-    NSCAssert(blockIsAnImpFactoryBlock(factoryBlock),
+    NSCAssert(TL_blockIsAnImpFactoryBlock(factoryBlock),
              @"Wrong type of implementation factory block.");
     
     __block OSSpinLock lock = OS_SPINLOCK_INIT;
@@ -202,7 +202,7 @@ static void swizzle(Class classToSwizzle,
     __block IMP originalIMP = NULL;
 
     // This block will be called by the client to get original implementation and call it.
-    RSSWizzleImpProvider originalImpProvider = ^IMP{
+    TL_RSSWizzleImpProvider originalImpProvider = ^IMP{
         // It's possible that another thread can call the method between the call to
         // class_replaceMethod and its return value being set.
         // So to be sure originalIMP has the right value, we need a lock.
@@ -219,7 +219,7 @@ static void swizzle(Class classToSwizzle,
         return imp;
     };
     
-    RSSwizzleInfo *swizzleInfo = [RSSwizzleInfo new];
+    TL_RSSwizzleInfo *swizzleInfo = [TL_RSSwizzleInfo new];
     swizzleInfo.selector = selector;
     swizzleInfo.impProviderBlock = originalImpProvider;
     
@@ -230,7 +230,7 @@ static void swizzle(Class classToSwizzle,
     
     const char *methodType = method_getTypeEncoding(method);
     
-    NSCAssert(blockIsCompatibleWithMethodType(newIMPBlock,methodType),
+    NSCAssert(TL_blockIsCompatibleWithMethodType(newIMPBlock,methodType),
              @"Block returned from factory is not compatible with method type.");
     
     IMP newIMP = imp_implementationWithBlock(newIMPBlock);
@@ -249,7 +249,7 @@ static void swizzle(Class classToSwizzle,
     OSSpinLockUnlock(&lock);
 }
 
-static NSMutableDictionary *swizzledClassesDictionary(){
+static NSMutableDictionary *TL_swizzledClassesDictionary(){
     static NSMutableDictionary *swizzledClasses;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
@@ -258,8 +258,8 @@ static NSMutableDictionary *swizzledClassesDictionary(){
     return swizzledClasses;
 }
 
-static NSMutableSet *swizzledClassesForKey(const void *key){
-    NSMutableDictionary *classesDictionary = swizzledClassesDictionary();
+static NSMutableSet *TL_swizzledClassesForKey(const void *key){
+    NSMutableDictionary *classesDictionary = TL_swizzledClassesDictionary();
     NSValue *keyValue = [NSValue valueWithPointer:key];
     NSMutableSet *swizzledClasses = [classesDictionary objectForKey:keyValue];
     if (!swizzledClasses) {
@@ -271,21 +271,21 @@ static NSMutableSet *swizzledClassesForKey(const void *key){
 
 +(BOOL)swizzleInstanceMethod:(SEL)selector
                      inClass:(Class)classToSwizzle
-               newImpFactory:(RSSwizzleImpFactoryBlock)factoryBlock
-                        mode:(RSSwizzleMode)mode
+               newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
+                        mode:(TL_RSSwizzleMode)mode
                          key:(const void *)key
 {
-    NSAssert(!(NULL == key && RSSwizzleModeAlways != mode),
-             @"Key may not be NULL if mode is not RSSwizzleModeAlways.");
+    NSAssert(!(NULL == key && TL_RSSwizzleModeAlways != mode),
+             @"Key may not be NULL if mode is not TL_RSSwizzleModeAlways.");
 
-    @synchronized(swizzledClassesDictionary()){
+    @synchronized(TL_swizzledClassesDictionary()){
         if (key){
-            NSSet *swizzledClasses = swizzledClassesForKey(key);
-            if (mode == RSSwizzleModeOncePerClass) {
+            NSSet *swizzledClasses = TL_swizzledClassesForKey(key);
+            if (mode == TL_RSSwizzleModeOncePerClass) {
                 if ([swizzledClasses containsObject:classToSwizzle]){
                     return NO;
                 }
-            }else if (mode == RSSwizzleModeOncePerClassAndSuperclasses){
+            }else if (mode == TL_RSSwizzleModeOncePerClassAndSuperclasses){
                 for (Class currentClass = classToSwizzle;
                      nil != currentClass;
                      currentClass = class_getSuperclass(currentClass))
@@ -297,10 +297,10 @@ static NSMutableSet *swizzledClassesForKey(const void *key){
             }
         }
         
-        swizzle(classToSwizzle, selector, factoryBlock);
+        TL_swizzle(classToSwizzle, selector, factoryBlock);
         
         if (key){
-            [swizzledClassesForKey(key) addObject:classToSwizzle];
+            [TL_swizzledClassesForKey(key) addObject:classToSwizzle];
         }
     }
     
@@ -309,12 +309,12 @@ static NSMutableSet *swizzledClassesForKey(const void *key){
 
 +(void)swizzleClassMethod:(SEL)selector
                   inClass:(Class)classToSwizzle
-            newImpFactory:(RSSwizzleImpFactoryBlock)factoryBlock
+            newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
 {
     [self swizzleInstanceMethod:selector
                         inClass:object_getClass(classToSwizzle)
                   newImpFactory:factoryBlock
-                           mode:RSSwizzleModeAlways
+                           mode:TL_RSSwizzleModeAlways
                             key:NULL];
 }
 
