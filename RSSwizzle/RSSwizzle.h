@@ -20,7 +20,7 @@
 #define TL_RSSWReplacement(code...) code
 
 /// A macro for casting and calling original implementation.
-/// May be used only in TL_RSSwizzleInstanceMethod or RSSwizzleClassMethod macros.
+/// May be used only in TL_RSSwizzleInstanceMethod or  TL_RSSwizzleClassMethod macros.
 #define TL_RSSWCallOriginal(arguments...) _TL_RSSWCallOriginal(arguments)
 
 #pragma mark └ Swizzle Instance Method
@@ -91,7 +91,7 @@
 
  @code
 
-    RSSwizzleClassMethod(classToSwizzle,
+     TL_RSSwizzleClassMethod(classToSwizzle,
                          @selector(calculate:),
                          TL_RSSWReturnType(int),
                          TL_RSSWArguments(int number),
@@ -118,12 +118,12 @@
  @param TL_RSSWReplacement The code of the new implementation of the swizzled method wrapped in the TL_RSSWReplacement macro.
  
  */
-#define RSSwizzleClassMethod(classToSwizzle, \
+#define  TL_RSSwizzleClassMethod(classToSwizzle, \
                              selector, \
                              TL_RSSWReturnType, \
                              TL_RSSWArguments, \
                              TL_RSSWReplacement) \
-    _RSSwizzleClassMethod(classToSwizzle, \
+    _ TL_RSSwizzleClassMethod(classToSwizzle, \
                           selector, \
                           TL_RSSWReturnType, \
                           _TL_RSSWWrapArg(TL_RSSWArguments), \
@@ -344,7 +344,7 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
      mode:TL_RSSwizzleMode \
      key:KEY];
 
-#define _RSSwizzleClassMethod(classToSwizzle, \
+#define _ TL_RSSwizzleClassMethod(classToSwizzle, \
                               selector, \
                               TL_RSSWReturnType, \
                               TL_RSSWArguments, \
