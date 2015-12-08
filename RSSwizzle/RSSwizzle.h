@@ -123,7 +123,7 @@
                              TL_RSSWReturnType, \
                              TL_RSSWArguments, \
                              TL_RSSWReplacement) \
-    _ TL_RSSwizzleClassMethod(classToSwizzle, \
+    _TL_RSSwizzleClassMethod(classToSwizzle, \
                           selector, \
                           TL_RSSWReturnType, \
                           _TL_RSSWWrapArg(TL_RSSWArguments), \
@@ -344,7 +344,7 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
      mode:TL_RSSwizzleMode \
      key:KEY];
 
-#define _ TL_RSSwizzleClassMethod(classToSwizzle, \
+#define _TL_RSSwizzleClassMethod(classToSwizzle, \
                               selector, \
                               TL_RSSWReturnType, \
                               TL_RSSWArguments, \
