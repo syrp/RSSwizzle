@@ -82,6 +82,21 @@
                              TL_RSSwizzleMode, \
                              key)
 
+#define TL_RSSwizzleInstanceMethodSkipMethodCheck(classToSwizzle, \
+                                selector, \
+                                TL_RSSWReturnType, \
+                                TL_RSSWArguments, \
+                                TL_RSSWReplacement, \
+                                TL_RSSwizzleMode, \
+                                key) \
+_TL_RSSwizzleInstanceMethodSkipMethodCheck(classToSwizzle, \
+                            selector, \
+                            TL_RSSWReturnType, \
+                            _TL_RSSWWrapArg(TL_RSSWArguments), \
+                            _TL_RSSWWrapArg(TL_RSSWReplacement), \
+                            TL_RSSwizzleMode, \
+                            key)
+
 #pragma mark └ Swizzle Class Method
 
 /**
@@ -259,7 +274,8 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
                      inClass:(Class)classToSwizzle
                newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
                         mode:(TL_RSSwizzleMode)mode
-                         key:(const void *)key;
+                         key:(const void *)key
+             skipMethodCheck:(BOOL)skipMethodCheck;
 
 #pragma mark └ Swizzle Class method
 
@@ -303,7 +319,8 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
  */
 +(void)swizzleClassMethod:(SEL)selector
                   inClass:(Class)classToSwizzle
-            newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock;
+            newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
+          skipMethodCheck:(BOOL)skipMethodCheck;
 
 @end
 
@@ -342,7 +359,33 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
         }; \
      } \
      mode:TL_RSSwizzleMode \
-     key:KEY];
+     key:KEY \
+     skipMethodCheck:NO];
+
+#define _TL_RSSwizzleInstanceMethodSkipMethodCheck(classToSwizzle, \
+                                selector, \
+                                TL_RSSWReturnType, \
+                                TL_RSSWArguments, \
+                                TL_RSSWReplacement, \
+                                TL_RSSwizzleMode, \
+                                KEY) \
+    [TL_RSSwizzle \
+    swizzleInstanceMethod:selector \
+    inClass:[classToSwizzle class] \
+    newImpFactory:^id(TL_RSSwizzleInfo *swizzleInfo) { \
+        TL_RSSWReturnType (*originalImplementation_)(_TL_RSSWDel3Arg(__unsafe_unretained id, \
+                                                                SEL, \
+                                                                TL_RSSWArguments)); \
+        SEL selector_ = selector; \
+        return ^TL_RSSWReturnType (_TL_RSSWDel2Arg(__unsafe_unretained id self, \
+                                                TL_RSSWArguments)) \
+        { \
+            TL_RSSWReplacement \
+        }; \
+    } \
+    mode:TL_RSSwizzleMode \
+    key:KEY \
+    skipMethodCheck:YES];
 
 #define _TL_RSSwizzleClassMethod(classToSwizzle, \
                               selector, \
@@ -362,7 +405,8 @@ typedef NS_ENUM(NSUInteger, TL_RSSwizzleMode) {
         { \
             TL_RSSWReplacement \
         }; \
-     }];
+     } \
+    skipMethodCheck:NO];
 
 #define _TL_RSSWCallOriginal(arguments...) \
     ((__typeof(originalImplementation_))[swizzleInfo \

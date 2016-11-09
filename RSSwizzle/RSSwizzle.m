@@ -183,7 +183,8 @@ typedef IMP (^TL_RSSWizzleImpProvider)(void);
 
 static void TL_swizzle(Class classToSwizzle,
                     SEL selector,
-                    TL_RSSwizzleImpFactoryBlock factoryBlock)
+                    TL_RSSwizzleImpFactoryBlock factoryBlock,
+                    BOOL skipMethodCheck)
 {
     Method method = class_getInstanceMethod(classToSwizzle, selector);
     
@@ -229,9 +230,11 @@ static void TL_swizzle(Class classToSwizzle,
     id newIMPBlock = factoryBlock(swizzleInfo);
     
     const char *methodType = method_getTypeEncoding(method);
-    
-    NSCAssert(TL_blockIsCompatibleWithMethodType(newIMPBlock,methodType),
-             @"Block returned from factory is not compatible with method type.");
+
+    if (!skipMethodCheck) {
+        NSCAssert(TL_blockIsCompatibleWithMethodType(newIMPBlock,methodType),
+                 @"Block returned from factory is not compatible with method type.");
+    }
     
     IMP newIMP = imp_implementationWithBlock(newIMPBlock);
     
@@ -274,6 +277,7 @@ static NSMutableSet *TL_swizzledClassesForKey(const void *key){
                newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
                         mode:(TL_RSSwizzleMode)mode
                          key:(const void *)key
+             skipMethodCheck:(BOOL)skipMethodCheck
 {
     NSAssert(!(NULL == key && TL_RSSwizzleModeAlways != mode),
              @"Key may not be NULL if mode is not TL_RSSwizzleModeAlways.");
@@ -297,7 +301,7 @@ static NSMutableSet *TL_swizzledClassesForKey(const void *key){
             }
         }
         
-        TL_swizzle(classToSwizzle, selector, factoryBlock);
+        TL_swizzle(classToSwizzle, selector, factoryBlock, skipMethodCheck);
         
         if (key){
             [TL_swizzledClassesForKey(key) addObject:classToSwizzle];
@@ -310,12 +314,14 @@ static NSMutableSet *TL_swizzledClassesForKey(const void *key){
 +(void)swizzleClassMethod:(SEL)selector
                   inClass:(Class)classToSwizzle
             newImpFactory:(TL_RSSwizzleImpFactoryBlock)factoryBlock
+          skipMethodCheck:(BOOL)skipMethodCheck
 {
     [self swizzleInstanceMethod:selector
                         inClass:object_getClass(classToSwizzle)
                   newImpFactory:factoryBlock
                            mode:TL_RSSwizzleModeAlways
-                            key:NULL];
+                            key:NULL
+                skipMethodCheck:skipMethodCheck];
 }
 
 
